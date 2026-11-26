@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Pinti - APK testi</title>
+<title>Pinti - APK testi 2</title>
 <style>
   body { font-family: sans-serif; margin: 16px; line-height: 1.5; background: #fbf7ee; color: #2b2417; }
   h1 { margin: 0 0 4px; }
@@ -16,12 +16,14 @@
 </style>
 </head>
 <body>
-  <h1>Pinti - APK testi 🐷</h1>
+  <h1>Pinti - APK testi 2 🐷</h1>
   <div id="durum"></div>
   <p>Aranacak kelime:</p>
   <input id="q" value="telefon"> <br>
   <button id="dugme">Test et</button>
   <button id="kopyala">Sonucu kopyala</button>
+  <button id="tv">Trendyol'u gerçek tarayıcıyla dene</button>
+  <pre id="tvsonuc" style="white-space:pre-wrap;word-break:break-word;background:#fff;border:1px solid #eadfc6;border-radius:8px;padding:10px;font-size:12px;display:none"></pre>
   <div id="sonuc"></div>
 
 <script>
@@ -95,6 +97,59 @@
   document.getElementById("kopyala").onclick = async () => {
     try { await navigator.clipboard.writeText(ozet || "Henüz test yok"); alert("Kopyalandı"); }
     catch (e) { alert("Kopyalanamadı, ekran görüntüsü al."); }
+  };
+
+  // ---- Trendyol: uygulamanın içindeki gerçek tarayıcı bileşeniyle ----
+  function trendyolWebView(q) {
+    return new Promise((resolve) => {
+      if (!(window.cordova && window.cordova.InAppBrowser)) {
+        return resolve({ sonuc: "HATA", hata: "InAppBrowser eklentisi yok (cordova.InAppBrowser bulunamadı)" });
+      }
+      const url = "https://www.trendyol.com/sr?q=" + q;
+      const ref = window.cordova.InAppBrowser.open(url, "_blank", "location=no,hidden=no,clearcache=yes,clearsessioncache=yes");
+      let bitti = false;
+      let deneme = 0;
+      const bitir = (o) => { if (bitti) return; bitti = true; try { ref.close(); } catch (e) {} resolve(o); };
+      setTimeout(() => bitir({ sonuc: "ZAMAN_ASIMI" }), 45000);
+
+      const kod = `(function(){ try {
+        var p = window["__single-search-result__PROPS"];
+        var ur = (p && p.data && p.data.products) || [];
+        var kartlar = document.querySelectorAll('a[href*="-p-"]');
+        return JSON.stringify({
+          baslik: document.title,
+          veriVar: !!p,
+          urunSayisi: ur.length,
+          ilkUrun: ur[0] ? JSON.stringify(ur[0]).slice(0, 900) : null,
+          kartSayisi: kartlar.length,
+          ilkKart: kartlar[0] ? (kartlar[0].innerText || "").replace(/\\s+/g, " ").slice(0, 200) : null
+        });
+      } catch (e) { return JSON.stringify({ hata: String(e) }); } })()`;
+
+      const dene = () => {
+        deneme++;
+        ref.executeScript({ code: kod }, (sonuc) => {
+          let o = {};
+          try { o = JSON.parse(sonuc && sonuc[0]); } catch (e) { o = { hata: "okunamadı: " + String(sonuc).slice(0, 100) }; }
+          const engel = /just a moment|attention required/i.test(o.baslik || "");
+          if ((o.veriVar || o.kartSayisi > 0) && !engel) return bitir({ sonuc: "GECTI", ...o });
+          if (deneme >= 6) return bitir({ sonuc: engel ? "ENGELLI" : "VERI_YOK", ...o });
+          setTimeout(dene, 3500);
+        });
+      };
+      ref.addEventListener("loadstop", () => { if (deneme === 0) setTimeout(dene, 3000); });
+      ref.addEventListener("loaderror", (e) => bitir({ sonuc: "HATA", hata: (e && e.message) || "yükleme hatası" }));
+    });
+  }
+
+  document.getElementById("tv").onclick = async () => {
+    const kutu = document.getElementById("tvsonuc");
+    kutu.style.display = "block";
+    kutu.textContent = "Gerçek tarayıcı açılıyor, 10-45 sn sürebilir. Ekranda Trendyol sayfası görünürse karışma...";
+    const q = encodeURIComponent(document.getElementById("q").value || "telefon");
+    const s = await trendyolWebView(q);
+    ozet = "TRENDYOL WEBVIEW: " + JSON.stringify(s) + "\n" + ozet;
+    kutu.textContent = JSON.stringify(s, null, 1);
   };
 </script>
 </body>
