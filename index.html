@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Pinti - APK testi 2</title>
+<title>Pinti - APK testi 3</title>
 <style>
   body { font-family: sans-serif; margin: 16px; line-height: 1.5; background: #fbf7ee; color: #2b2417; }
   h1 { margin: 0 0 4px; }
@@ -16,7 +16,7 @@
 </style>
 </head>
 <body>
-  <h1>Pinti - APK testi 2 🐷</h1>
+  <h1>Pinti - APK testi 3 🐷</h1>
   <div id="durum"></div>
   <p>Aranacak kelime:</p>
   <input id="q" value="telefon"> <br>
@@ -106,11 +106,11 @@
         return resolve({ sonuc: "HATA", hata: "InAppBrowser eklentisi yok (cordova.InAppBrowser bulunamadı)" });
       }
       const url = "https://www.trendyol.com/sr?q=" + q;
-      const ref = window.cordova.InAppBrowser.open(url, "_blank", "location=no,hidden=no,clearcache=yes,clearsessioncache=yes");
+      const ref = window.cordova.InAppBrowser.open(url, "_blank", "location=no,hidden=no");
       let bitti = false;
       let deneme = 0;
       const bitir = (o) => { if (bitti) return; bitti = true; try { ref.close(); } catch (e) {} resolve(o); };
-      setTimeout(() => bitir({ sonuc: "ZAMAN_ASIMI" }), 45000);
+      setTimeout(() => bitir({ sonuc: "ZAMAN_ASIMI" }), 130000);
 
       const kod = `(function(){ try {
         var p = window["__single-search-result__PROPS"];
@@ -133,7 +133,7 @@
           try { o = JSON.parse(sonuc && sonuc[0]); } catch (e) { o = { hata: "okunamadı: " + String(sonuc).slice(0, 100) }; }
           const engel = /just a moment|attention required/i.test(o.baslik || "");
           if ((o.veriVar || o.kartSayisi > 0) && !engel) return bitir({ sonuc: "GECTI", ...o });
-          if (deneme >= 6) return bitir({ sonuc: engel ? "ENGELLI" : "VERI_YOK", ...o });
+          if (deneme >= 36) return bitir({ sonuc: engel ? "ENGELLI" : "VERI_YOK", ...o });
           setTimeout(dene, 3500);
         });
       };
@@ -145,7 +145,7 @@
   document.getElementById("tv").onclick = async () => {
     const kutu = document.getElementById("tvsonuc");
     kutu.style.display = "block";
-    kutu.textContent = "Gerçek tarayıcı açılıyor, 10-45 sn sürebilir. Ekranda Trendyol sayfası görünürse karışma...";
+    kutu.textContent = "Gerçek tarayıcı açılıyor. Doğrulama ekranı çıkarsa kapatma, 2 dakikaya kadar bekle...";
     const q = encodeURIComponent(document.getElementById("q").value || "telefon");
     const s = await trendyolWebView(q);
     ozet = "TRENDYOL WEBVIEW: " + JSON.stringify(s) + "\n" + ozet;
