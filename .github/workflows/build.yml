@@ -22,7 +22,7 @@ jobs:
           mkdir -p www
           cp index.html www/index.html
           npm init -y
-          npm install @capacitor/core@7 @capacitor/cli@7 @capacitor/android@7
+          npm install @capacitor/core@7 @capacitor/cli@7 @capacitor/android@7 cordova-plugin-inappbrowser
           node -e "require('fs').writeFileSync('capacitor.config.json', JSON.stringify({appId:'com.pinti.app',appName:'Pinti',webDir:'www',server:{androidScheme:'https'},plugins:{CapacitorHttp:{enabled:true}}}))"
           npx cap add android
           npx cap sync android
