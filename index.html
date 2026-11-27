@@ -3,153 +3,266 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Pinti - APK testi 3</title>
+<title>Pinti</title>
 <style>
-  body { font-family: sans-serif; margin: 16px; line-height: 1.5; background: #fbf7ee; color: #2b2417; }
-  h1 { margin: 0 0 4px; }
-  button { font-size: 18px; padding: 12px 20px; margin: 8px 8px 8px 0; border: 0; border-radius: 10px; background: #e8a317; font-weight: 700; }
-  input { font-size: 18px; padding: 10px; width: 55%; }
-  .satir { padding: 10px; margin: 8px 0; background: #fff; border: 1px solid #eadfc6; border-radius: 8px; }
-  .satir small { color: #666; display: block; }
-  #durum { padding: 8px; border-radius: 8px; margin: 8px 0; }
-  .iyi { background: #d9f2e3; } .kotu { background: #fde0dc; }
+  :root {
+    --zemin: #fbf7ee; --kart: #ffffff; --yazi: #2b2417; --silik: #7a6f5b;
+    --vurgu: #e8a317; --cizgi: #eadfc6; --yesil: #1f8a4c;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --zemin: #17140d; --kart: #231e13; --yazi: #f4ead3; --silik: #b2a583; --vurgu: #f0b429; --cizgi: #3a321f; --yesil: #4cc98a; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--zemin); color: var(--yazi); font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; line-height: 1.4; }
+  header { padding: 24px 16px 8px; max-width: 720px; margin: 0 auto; }
+  h1 { margin: 0; font-size: 34px; letter-spacing: -1px; }
+  h1 span { color: var(--vurgu); }
+  .slogan { margin: 4px 0 0; color: var(--silik); }
+  form { display: flex; gap: 8px; margin-top: 14px; }
+  input[type=search] { flex: 1; min-width: 0; font-size: 17px; padding: 14px; border-radius: 12px; border: 2px solid var(--cizgi); background: var(--kart); color: var(--yazi); }
+  input[type=search]:focus { outline: none; border-color: var(--vurgu); }
+  button { font-family: inherit; }
+  .ara { font-size: 17px; font-weight: 700; padding: 0 20px; border: 0; border-radius: 12px; background: var(--vurgu); color: #2b2417; }
+  label.gizli { display: block; font-size: 13px; color: var(--silik); margin-top: 8px; }
+  main { max-width: 720px; margin: 0 auto; padding: 0 16px 40px; }
+  .bilgi { color: var(--silik); margin: 14px 0 6px; }
+  .uyari { font-size: 13px; color: var(--silik); margin: 4px 0 10px; }
+  .cipler { display: flex; gap: 8px; flex-wrap: wrap; margin: 8px 0 4px; }
+  .cip { font-size: 14px; font-weight: 600; padding: 6px 12px; border-radius: 999px; border: 1px solid var(--cizgi); background: var(--kart); color: var(--yazi); }
+  .cip.aktif { background: var(--vurgu); border-color: var(--vurgu); color: #2b2417; }
+  .kart { display: flex; gap: 12px; padding: 12px; margin: 10px 0; text-decoration: none; color: inherit; background: var(--kart); border: 1px solid var(--cizgi); border-radius: 14px; }
+  .kart.ilk { border: 2px solid var(--yesil); }
+  .resim { flex: none; width: 84px; height: 84px; border-radius: 10px; background: var(--zemin); object-fit: contain; display: flex; align-items: center; justify-content: center; font-size: 30px; }
+  .icerik { min-width: 0; flex: 1; }
+  .ad { font-size: 15px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .fiyat { font-size: 21px; font-weight: 800; margin-top: 4px; }
+  .alt { font-size: 13px; color: var(--silik); }
+  .etiket { color: var(--yesil); font-weight: 700; }
+  details { margin-top: 28px; color: var(--silik); font-size: 14px; }
+  details button { font-size: 15px; padding: 10px 14px; margin: 8px 8px 8px 0; border: 1px solid var(--cizgi); border-radius: 10px; background: var(--kart); color: var(--yazi); }
+  textarea { width: 100%; height: 220px; font-family: monospace; font-size: 11px; background: var(--kart); color: var(--yazi); border: 1px solid var(--cizgi); border-radius: 8px; }
 </style>
 </head>
 <body>
-  <h1>Pinti - APK testi 3 🐷</h1>
-  <div id="durum"></div>
-  <p>Aranacak kelime:</p>
-  <input id="q" value="telefon"> <br>
-  <button id="dugme">Test et</button>
-  <button id="kopyala">Sonucu kopyala</button>
-  <button id="tv">Trendyol'u gerçek tarayıcıyla dene</button>
-  <pre id="tvsonuc" style="white-space:pre-wrap;word-break:break-word;background:#fff;border:1px solid #eadfc6;border-radius:8px;padding:10px;font-size:12px;display:none"></pre>
-  <div id="sonuc"></div>
+<header>
+  <h1>Pint<span>i</span> 🐷</h1>
+  <p class="slogan">Ürünü yaz, en ucuzunu bul.</p>
+  <form id="form">
+    <input id="q" type="search" placeholder="Örn: iphone 15" autocomplete="off" required>
+    <button class="ara" type="submit">Ara</button>
+  </form>
+  <label class="gizli"><input type="checkbox" id="gizli"> Trendyol'u arka planda aç (deneysel)</label>
+</header>
+<main>
+  <div id="bilgi" class="bilgi"></div>
+  <div id="cipler" class="cipler"></div>
+  <div id="uyari" class="uyari"></div>
+  <div id="liste"></div>
+
+  <details>
+    <summary>Geliştirici araçları</summary>
+    <button id="rontgen" type="button">Diğer siteler için röntgen</button>
+    <button id="kopyala" type="button">Kopyala</button>
+    <textarea id="rkutu" readonly></textarea>
+  </details>
+</main>
 
 <script>
-  const native = !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform());
-  const durum = document.getElementById("durum");
-  durum.className = native ? "iyi" : "kotu";
-  durum.textContent = native
-    ? "✅ Uygulama içinde çalışıyor: istekler telefonundan çıkacak."
-    : "⚠️ Bu sayfa tarayıcıda açık. Test sadece APK içinde anlamlı, tarayıcı diğer siteleri okuyamaz.";
+  // Hepsiburada, Koçtaş ve D&R için Vercel'deki Pinti sunucusu kullanılıyor.
+  // Adresin farklıysa buraya yaz:
+  const VERCEL = "https://pintiv2.vercel.app";
 
   const UA = "Mozilla/5.0 (Linux; Android 10; SM-A305F) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36";
-  const FIYAT = /\d{1,3}(?:\.\d{3})*(?:,\d{1,2})?\s?(?:TL|₺)/g;
-  const SITELER = (q) => [
-    ["Trendyol", `https://www.trendyol.com/sr?q=${q}`],
-    ["Hepsiburada", `https://www.hepsiburada.com/ara?q=${q}`],
-    ["N11", `https://www.n11.com/arama?q=${q}`],
-    ["Amazon TR", `https://www.amazon.com.tr/s?k=${q}`],
-    ["Vatan", `https://www.vatanbilgisayar.com/arama/${q}/`],
-    ["Teknosa", `https://www.teknosa.com/arama/?s=${q}`],
-    ["MediaMarkt", `https://www.mediamarkt.com.tr/tr/search.html?query=${q}`],
-    ["İncehesap", `https://www.incehesap.com/arama/?q=${q}`],
-    ["İtopya", `https://www.itopya.com/arama/?q=${q}`],
-    ["PttAVM", `https://www.pttavm.com/arama?q=${q}`],
-    ["Çiçeksepeti", `https://www.ciceksepeti.com/arama?query=${q}`],
-    ["Pazarama", `https://www.pazarama.com/arama?q=${q}`],
-  ];
-  const simge = { UYGUN: "✅", GIRDI_FIYAT_YOK: "🟡", ENGELLI: "❌", HATA: "⚠️", BEKLIYOR: "⏳" };
-  let ozet = "";
+  const zamanAsimi = (p, ms) => Promise.race([p, new Promise((_, red) => setTimeout(() => red(new Error("zaman aşımı")), ms))]);
+  const kes = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const fiyatYaz = (n) => n.toLocaleString("tr-TR", { maximumFractionDigits: 2 }) + " TL";
 
-  const zamanAsimi = (p, ms) =>
-    Promise.race([p, new Promise((_, red) => setTimeout(() => red(new Error("zaman aşımı")), ms))]);
+  // ---------- Alaka süzgeci ----------
+  function norm(t) {
+    return String(t).replace(/İ/g, "i").replace(/I/g, "i").toLowerCase()
+      .replace(/ı/g, "i").replace(/ö/g, "o").replace(/ü/g, "u").replace(/ş/g, "s").replace(/ç/g, "c").replace(/ğ/g, "g");
+  }
+  function alakaliMi(ad, kelimeler) {
+    if (!kelimeler.length) return true;
+    const b = norm(ad);
+    return kelimeler.filter((k) => b.includes(k)).length >= Math.ceil(kelimeler.length * 0.75);
+  }
 
-  async function dene(ad, url) {
+  // ---------- Kaynak 1: Vercel (Hepsiburada + Koçtaş + D&R) ----------
+  async function vercelAra(q) {
+    const r = await zamanAsimi(fetch(VERCEL + "/api/ara?q=" + encodeURIComponent(q)), 30000);
+    const v = await r.json();
+    if (!v.urunler) throw new Error(v.hata || "cevap yok");
+    return { urunler: v.urunler, notlar: v.hatalar || [] };
+  }
+
+  // ---------- Kaynak 2: Trendyol (uygulama içi gerçek tarayıcı) ----------
+  // Bu fonksiyon Trendyol sayfasının İÇİNDE çalışır.
+  function sayfaOku() {
     try {
-      const r = await zamanAsimi(fetch(url, { headers: { "User-Agent": UA, "Accept-Language": "tr-TR,tr;q=0.9", Accept: "text/html,application/xhtml+xml,*/*;q=0.8" } }), 20000);
-      const metin = await r.text();
-      const baslik = ((metin.match(/<title[^>]*>([^<]*)<\/title>/i) || [])[1] || "").trim().slice(0, 60);
-      const engel = /just a moment|attention required|access denied|captcha|üzgünüz/i.test(baslik) || /cf-challenge|_cf_chl/i.test(metin);
-      const fiyatSayisi = (metin.match(FIYAT) || []).length;
-      const veriVar = metin.includes("__single-search-result__PROPS");
-      let sonuc = r.status === 200 && !engel ? (fiyatSayisi > 0 || veriVar ? "UYGUN" : "GIRDI_FIYAT_YOK") : "ENGELLI";
-      return { ad, sonuc, durum: r.status, baslik, fiyatSayisi, veriVar };
-    } catch (e) {
-      return { ad, sonuc: "HATA", hata: String(e.message || e).slice(0, 80) };
-    }
-  }
-
-  function satirYaz(kutu, s) {
-    kutu.innerHTML = `<b>${simge[s.sonuc] || ""} ${s.ad}</b>: ${s.sonuc}
-      <small>${s.durum !== undefined ? "durum: " + s.durum + " | fiyat sayısı: " + s.fiyatSayisi + (s.ad === "Trendyol" ? " | gömülü veri: " + (s.veriVar ? "var" : "yok") : "") : ""}
-      ${s.baslik ? "<br>başlık: " + s.baslik : ""}${s.hata ? "<br>hata: " + s.hata : ""}</small>`;
-  }
-
-  document.getElementById("dugme").onclick = async () => {
-    const q = encodeURIComponent(document.getElementById("q").value || "telefon");
-    const kap = document.getElementById("sonuc");
-    kap.innerHTML = "";
-    ozet = "";
-    const liste = SITELER(q);
-    await Promise.all(liste.map(async ([ad, url]) => {
-      const kutu = document.createElement("div");
-      kutu.className = "satir";
-      kutu.innerHTML = `<b>⏳ ${ad}</b>: deneniyor...`;
-      kap.appendChild(kutu);
-      const s = await dene(ad, url);
-      satirYaz(kutu, s);
-      ozet += `${ad}: ${s.sonuc} (durum ${s.durum ?? "-"}, fiyat ${s.fiyatSayisi ?? "-"}${s.ad === "Trendyol" ? ", veri " + (s.veriVar ? "var" : "yok") : ""}${s.hata ? ", hata " + s.hata : ""})\n`;
-    }));
-  };
-
-  document.getElementById("kopyala").onclick = async () => {
-    try { await navigator.clipboard.writeText(ozet || "Henüz test yok"); alert("Kopyalandı"); }
-    catch (e) { alert("Kopyalanamadı, ekran görüntüsü al."); }
-  };
-
-  // ---- Trendyol: uygulamanın içindeki gerçek tarayıcı bileşeniyle ----
-  function trendyolWebView(q) {
-    return new Promise((resolve) => {
-      if (!(window.cordova && window.cordova.InAppBrowser)) {
-        return resolve({ sonuc: "HATA", hata: "InAppBrowser eklentisi yok (cordova.InAppBrowser bulunamadı)" });
+      var p = window["__single-search-result__PROPS"];
+      var ham = (p && p.data && p.data.products) || [];
+      var out = [];
+      function sayi(v) {
+        if (v === null || v === undefined) return null;
+        if (typeof v === "number") return v;
+        var n = parseFloat(String(v).replace(/\./g, "").replace(",", "."));
+        return isFinite(n) ? n : null;
       }
-      const url = "https://www.trendyol.com/sr?q=" + q;
-      const ref = window.cordova.InAppBrowser.open(url, "_blank", "location=no,hidden=no");
-      let bitti = false;
-      let deneme = 0;
-      const bitir = (o) => { if (bitti) return; bitti = true; try { ref.close(); } catch (e) {} resolve(o); };
-      setTimeout(() => bitir({ sonuc: "ZAMAN_ASIMI" }), 130000);
+      for (var i = 0; i < ham.length; i++) {
+        var x = ham[i], pr = x.price || {};
+        var f = pr.sellingPrice != null ? pr.sellingPrice : (pr.discountedPrice != null ? pr.discountedPrice : (pr.originalPrice != null ? pr.originalPrice : pr.buyingPrice));
+        var fiyat = sayi(f);
+        var marka = typeof x.brand === "string" ? x.brand : ((x.brand && x.brand.name) || "");
+        var ad = (x.name || "").trim();
+        if (marka && ad.toLowerCase().indexOf(marka.toLowerCase()) !== 0) ad = marka + " " + ad;
+        var link = x.url ? (/^https?:/.test(x.url) ? x.url : "https://www.trendyol.com" + x.url) : "https://www.trendyol.com/sr?q=" + encodeURIComponent(ad);
+        var resim = x.image || (x.images && x.images[0]) || null;
+        if (ad && fiyat !== null) out.push({ ad: ad, fiyat: fiyat, link: link, resim: resim });
+      }
+      var kaynak = "json";
+      if (!out.length) {
+        kaynak = "dom";
+        var gor = {}, a = document.querySelectorAll('a[href*="-p-"]');
+        for (var j = 0; j < a.length; j++) {
+          var h = a[j].getAttribute("href");
+          if (!h || gor[h]) continue;
+          gor[h] = 1;
+          var t = (a[j].innerText || "").replace(/\s+/g, " ").trim();
+          var m = t.match(/\d{1,3}(?:\.\d{3})*(?:,\d{1,2})?\s?TL/g);
+          if (!m) continue;
+          var f2 = sayi(m[m.length - 1].replace(/\s?TL/, ""));
+          var ad2 = t.split(m[0])[0].trim().slice(0, 140);
+          var img = a[j].querySelector("img");
+          if (ad2 && f2 !== null) out.push({ ad: ad2, fiyat: f2, link: /^https?:/.test(h) ? h : "https://www.trendyol.com" + h, resim: img ? (img.getAttribute("src") || img.getAttribute("data-src")) : null });
+        }
+      }
+      return JSON.stringify({
+        baslik: document.title, veriVar: !!p, kaynak: kaynak, hamSayisi: ham.length, urunler: out,
+        anahtarlar: ham[0] ? Object.keys(ham[0]).slice(0, 40) : []
+      });
+    } catch (e) { return JSON.stringify({ hata: String(e) }); }
+  }
+  const SAYFA_KODU = "(" + sayfaOku.toString() + ")()";
 
-      const kod = `(function(){ try {
-        var p = window["__single-search-result__PROPS"];
-        var ur = (p && p.data && p.data.products) || [];
-        var kartlar = document.querySelectorAll('a[href*="-p-"]');
-        return JSON.stringify({
-          baslik: document.title,
-          veriVar: !!p,
-          urunSayisi: ur.length,
-          ilkUrun: ur[0] ? JSON.stringify(ur[0]).slice(0, 900) : null,
-          kartSayisi: kartlar.length,
-          ilkKart: kartlar[0] ? (kartlar[0].innerText || "").replace(/\\s+/g, " ").slice(0, 200) : null
-        });
-      } catch (e) { return JSON.stringify({ hata: String(e) }); } })()`;
+  function trendyolAra(q, gizli) {
+    return new Promise((resolve, reject) => {
+      if (!(window.cordova && window.cordova.InAppBrowser)) return reject(new Error("uygulama içinde değil"));
+      const ref = window.cordova.InAppBrowser.open("https://www.trendyol.com/sr?q=" + encodeURIComponent(q), "_blank", gizli ? "location=no,hidden=yes" : "location=no,hidden=no");
+      let bitti = false, deneme = 0;
+      const bitir = (f) => { if (bitti) return; bitti = true; try { ref.close(); } catch (e) {} f(); };
+      setTimeout(() => bitir(() => reject(new Error("Trendyol zaman aşımı"))), 130000);
 
-      const dene = () => {
+      const oku = () => {
         deneme++;
-        ref.executeScript({ code: kod }, (sonuc) => {
+        ref.executeScript({ code: SAYFA_KODU }, (sonuc) => {
           let o = {};
-          try { o = JSON.parse(sonuc && sonuc[0]); } catch (e) { o = { hata: "okunamadı: " + String(sonuc).slice(0, 100) }; }
+          try { o = JSON.parse(sonuc && sonuc[0]); } catch (e) { o = {}; }
           const engel = /just a moment|attention required/i.test(o.baslik || "");
-          if ((o.veriVar || o.kartSayisi > 0) && !engel) return bitir({ sonuc: "GECTI", ...o });
-          if (deneme >= 36) return bitir({ sonuc: engel ? "ENGELLI" : "VERI_YOK", ...o });
-          setTimeout(dene, 3500);
+          if (!engel && (o.urunler && o.urunler.length)) return bitir(() => resolve({ urunler: o.urunler.map((u) => ({ ...u, site: "Trendyol", fiyatMetin: fiyatYaz(u.fiyat) })) }));
+          if (!engel && o.veriVar) return bitir(() => resolve({ urunler: [] }));
+          if (deneme >= 36) return bitir(() => reject(new Error(engel ? "Trendyol doğrulaması bitmedi" : "Trendyol verisi okunamadı")));
+          setTimeout(oku, 3500);
         });
       };
-      ref.addEventListener("loadstop", () => { if (deneme === 0) setTimeout(dene, 3000); });
-      ref.addEventListener("loaderror", (e) => bitir({ sonuc: "HATA", hata: (e && e.message) || "yükleme hatası" }));
+      ref.addEventListener("loadstop", () => { if (deneme === 0) setTimeout(oku, 3000); });
+      ref.addEventListener("loaderror", (e) => bitir(() => reject(new Error((e && e.message) || "Trendyol yüklenemedi"))));
     });
   }
 
-  document.getElementById("tv").onclick = async () => {
-    const kutu = document.getElementById("tvsonuc");
-    kutu.style.display = "block";
-    kutu.textContent = "Gerçek tarayıcı açılıyor. Doğrulama ekranı çıkarsa kapatma, 2 dakikaya kadar bekle...";
-    const q = encodeURIComponent(document.getElementById("q").value || "telefon");
-    const s = await trendyolWebView(q);
-    ozet = "TRENDYOL WEBVIEW: " + JSON.stringify(s) + "\n" + ozet;
-    kutu.textContent = JSON.stringify(s, null, 1);
+  // ---------- Ekran ----------
+  const form = document.getElementById("form");
+  const bilgi = document.getElementById("bilgi");
+  const liste = document.getElementById("liste");
+  const cipler = document.getElementById("cipler");
+  const uyari = document.getElementById("uyari");
+  let hepsi = [], secili = "Tümü", notlar = [], bekleyen = 0, sonSorgu = 0;
+
+  function ciz() {
+    const goster = secili === "Tümü" ? hepsi : hepsi.filter((u) => u.site === secili);
+    liste.innerHTML = goster.map((u, i) => `
+      <a class="kart ${i === 0 ? "ilk" : ""}" href="${kes(u.link)}" data-link="${kes(u.link)}">
+        ${u.resim ? `<img class="resim" src="${kes(u.resim)}" alt="" loading="lazy" referrerpolicy="no-referrer">` : `<div class="resim">📦</div>`}
+        <div class="icerik">
+          <div class="ad">${kes(u.ad)}</div>
+          <div class="fiyat">${kes(u.fiyatMetin)}</div>
+          <div class="alt">${kes(u.site)}${i === 0 ? ' · <span class="etiket">en ucuz</span>' : ""}</div>
+        </div>
+      </a>`).join("");
+    cipler.innerHTML = ["Tümü", ...new Set(hepsi.map((u) => u.site))]
+      .map((s) => `<button type="button" class="cip ${s === secili ? "aktif" : ""}" data-site="${kes(s)}">${kes(s)}</button>`).join("");
+    bilgi.textContent = (bekleyen ? "Aranıyor... " : "") + hepsi.length + " ürün bulundu, en ucuzdan pahalıya:";
+    uyari.textContent = notlar.length ? "Not: " + notlar.join(" | ") : "";
+  }
+
+  cipler.addEventListener("click", (e) => { const s = e.target.dataset && e.target.dataset.site; if (s) { secili = s; ciz(); } });
+  liste.addEventListener("click", (e) => {
+    const a = e.target.closest("a[data-link]");
+    if (!a) return;
+    e.preventDefault();
+    const url = a.dataset.link;
+    if (window.cordova && window.cordova.InAppBrowser) window.cordova.InAppBrowser.open(url, "_system");
+    else window.open(url, "_blank");
+  });
+
+  form.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const q = document.getElementById("q").value.trim();
+    if (!q) return;
+    const sorgu = ++sonSorgu;
+    const kelimeler = norm(q).split(/[^a-z0-9]+/).filter((k) => k.length >= 2);
+    hepsi = []; notlar = []; secili = "Tümü"; bekleyen = 2;
+    liste.innerHTML = ""; cipler.innerHTML = "";
+    bilgi.textContent = "Aranıyor...";
+
+    const ekle = (kaynakAdi, vaat) => vaat.then((s) => {
+      if (sorgu !== sonSorgu) return;
+      const uygun = s.urunler.filter((u) => alakaliMi(u.ad, kelimeler));
+      hepsi = hepsi.concat(uygun).sort((a, b) => a.fiyat - b.fiyat);
+      (s.notlar || []).forEach((n) => notlar.push(n));
+      if (!uygun.length) notlar.push(kaynakAdi + ": eşleşen ürün yok");
+    }).catch((err) => { if (sorgu === sonSorgu) notlar.push(kaynakAdi + ": " + (err.message || err)); })
+      .finally(() => { if (sorgu === sonSorgu) { bekleyen--; ciz(); } });
+
+    ekle("Vercel siteleri", vercelAra(q));
+    ekle("Trendyol", trendyolAra(q, document.getElementById("gizli").checked));
+  });
+
+  // ---------- Geliştirici: diğer siteler için röntgen ----------
+  const FIYAT = /\d{1,3}(?:\.\d{3})*(?:,\d{1,2})?\s?(?:TL|₺)/g;
+  document.getElementById("rontgen").onclick = async () => {
+    const k = document.getElementById("rkutu");
+    k.value = "Çekiliyor...";
+    const q = "telefon";
+    const siteler = [
+      ["N11", `https://www.n11.com/arama?q=${q}`],
+      ["Amazon TR", `https://www.amazon.com.tr/s?k=${q}`],
+      ["Vatan", `https://www.vatanbilgisayar.com/arama/${q}/`],
+      ["MediaMarkt", `https://www.mediamarkt.com.tr/tr/search.html?query=${q}`],
+      ["Pazarama", `https://www.pazarama.com/arama?q=${q}`],
+    ];
+    const cikti = await Promise.all(siteler.map(async ([ad, url]) => {
+      try {
+        const r = await zamanAsimi(fetch(url, { headers: { "User-Agent": UA, "Accept-Language": "tr-TR,tr;q=0.9" } }), 20000);
+        const html = await r.text();
+        const temiz = (s) => s.replace(/data:[^"']{20,}/g, "data:...").replace(/\sd="[^"]{30,}"/g, "").replace(/\s+/g, " ");
+        const cevreler = [];
+        let son = -5000;
+        for (const m of html.matchAll(FIYAT)) {
+          if (m.index - son < 3000) continue;
+          cevreler.push(temiz(html.slice(Math.max(0, m.index - 700), m.index + 120)));
+          son = m.index;
+          if (cevreler.length >= 2) break;
+        }
+        return { site: ad, durum: r.status, uzunluk: html.length, cevreler };
+      } catch (e) { return { site: ad, hata: String(e.message || e).slice(0, 80) }; }
+    }));
+    k.value = JSON.stringify(cikti, null, 1);
+  };
+  document.getElementById("kopyala").onclick = async () => {
+    const k = document.getElementById("rkutu");
+    try { await navigator.clipboard.writeText(k.value); alert("Kopyalandı"); }
+    catch (e) { k.select(); document.execCommand("copy"); alert("Kopyalandı"); }
   };
 </script>
 </body>
