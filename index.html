@@ -149,24 +149,28 @@
     return new Promise((resolve, reject) => {
       if (!(window.cordova && window.cordova.InAppBrowser)) return reject(new Error("uygulama içinde değil"));
       const ref = window.cordova.InAppBrowser.open("https://www.trendyol.com/sr?q=" + encodeURIComponent(q), "_blank", gizli ? "location=no,hidden=yes" : "location=no,hidden=no");
-      let bitti = false, deneme = 0;
-      const bitir = (f) => { if (bitti) return; bitti = true; try { ref.close(); } catch (e) {} f(); };
-      setTimeout(() => bitir(() => reject(new Error("Trendyol zaman aşımı"))), 130000);
+      let bitti = false, deneme = 0, okuyor = false, okumaBas = 0, sonDurum = "hiç cevap gelmedi";
+      let zamanlayici = null;
+      const bitir = (f) => { if (bitti) return; bitti = true; clearInterval(zamanlayici); try { ref.close(); } catch (e) {} f(); };
+      setTimeout(() => bitir(() => reject(new Error("zaman aşımı (" + sonDurum + ")"))), 130000);
 
-      const oku = () => {
-        deneme++;
+      const tik = () => {
+        if (bitti) return;
+        if (okuyor && Date.now() - okumaBas < 8000) return;
+        okuyor = true; okumaBas = Date.now(); deneme++;
         ref.executeScript({ code: SAYFA_KODU }, (sonuc) => {
+          okuyor = false;
           let o = {};
           try { o = JSON.parse(sonuc && sonuc[0]); } catch (e) { o = {}; }
           const engel = /just a moment|attention required/i.test(o.baslik || "");
-          if (!engel && (o.urunler && o.urunler.length)) return bitir(() => resolve({ urunler: o.urunler.map((u) => ({ ...u, site: "Trendyol", fiyatMetin: fiyatYaz(u.fiyat) })) }));
-          if (!engel && o.veriVar) return bitir(() => resolve({ urunler: [] }));
-          if (deneme >= 36) return bitir(() => reject(new Error(engel ? "Trendyol doğrulaması bitmedi" : "Trendyol verisi okunamadı")));
-          setTimeout(oku, 3500);
+          sonDurum = 'başlık "' + (o.baslik || "?") + '", veri ' + (o.veriVar ? "var" : "yok") + ", ürün " + ((o.urunler && o.urunler.length) || 0) + (o.hata ? ", hata " + o.hata : "");
+          if (!engel && o.urunler && o.urunler.length) return bitir(() => resolve({ urunler: o.urunler.map((u) => ({ ...u, site: "Trendyol", fiyatMetin: fiyatYaz(u.fiyat) })) }));
+          if (!engel && o.veriVar && deneme >= 3) return bitir(() => resolve({ urunler: [] }));
         });
       };
-      ref.addEventListener("loadstop", () => { if (deneme === 0) setTimeout(oku, 3000); });
-      ref.addEventListener("loaderror", (e) => bitir(() => reject(new Error((e && e.message) || "Trendyol yüklenemedi"))));
+      ref.addEventListener("loadstop", () => { if (!zamanlayici) zamanlayici = setInterval(tik, 3500); });
+      ref.addEventListener("loaderror", (e) => bitir(() => reject(new Error((e && e.message) || "yüklenemedi"))));
+      ref.addEventListener("exit", () => bitir(() => reject(new Error("pencere erken kapandı (" + sonDurum + ")"))));
     });
   }
 
@@ -220,7 +224,8 @@
       const uygun = s.urunler.filter((u) => alakaliMi(u.ad, kelimeler));
       hepsi = hepsi.concat(uygun).sort((a, b) => a.fiyat - b.fiyat);
       (s.notlar || []).forEach((n) => notlar.push(n));
-      if (!uygun.length) notlar.push(kaynakAdi + ": eşleşen ürün yok");
+      if (!uygun.length) notlar.push(kaynakAdi + ": eşleşen ürün yok (" + s.urunler.length + " üründen hiçbiri aramaya uymadı)");
+      else if (uygun.length < s.urunler.length) notlar.push(kaynakAdi + ": " + s.urunler.length + " üründen " + uygun.length + " tanesi aramaya uydu");
     }).catch((err) => { if (sorgu === sonSorgu) notlar.push(kaynakAdi + ": " + (err.message || err)); })
       .finally(() => { if (sorgu === sonSorgu) { bekleyen--; ciz(); } });
 
