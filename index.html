@@ -148,29 +148,39 @@
   function trendyolAra(q, gizli) {
     return new Promise((resolve, reject) => {
       if (!(window.cordova && window.cordova.InAppBrowser)) return reject(new Error("uygulama içinde değil"));
-      const ref = window.cordova.InAppBrowser.open("https://www.trendyol.com/sr?q=" + encodeURIComponent(q), "_blank", gizli ? "location=no,hidden=yes" : "location=no,hidden=no");
-      let bitti = false, deneme = 0, okuyor = false, okumaBas = 0, sonDurum = "hiç cevap gelmedi";
+      const olay = { loadstart: 0, loadstop: 0, loaderror: 0, tik: 0, cevap: 0, hata: "" };
+      let ref;
+      try {
+        ref = window.cordova.InAppBrowser.open("https://www.trendyol.com/sr?q=" + encodeURIComponent(q), "_blank", gizli ? "location=no,hidden=yes" : "location=no,hidden=no");
+      } catch (e) { return reject(new Error("pencere açılamadı: " + e)); }
+      let bitti = false, okuyor = false, okumaBas = 0, sonDurum = "hiç cevap gelmedi";
       let zamanlayici = null;
+      const ozet = () => "olaylar " + JSON.stringify(olay) + ", son: " + sonDurum;
       const bitir = (f) => { if (bitti) return; bitti = true; clearInterval(zamanlayici); try { ref.close(); } catch (e) {} f(); };
-      setTimeout(() => bitir(() => reject(new Error("zaman aşımı (" + sonDurum + ")"))), 130000);
+      setTimeout(() => bitir(() => reject(new Error("zaman aşımı (" + ozet() + ")"))), 130000);
 
       const tik = () => {
         if (bitti) return;
         if (okuyor && Date.now() - okumaBas < 8000) return;
-        okuyor = true; okumaBas = Date.now(); deneme++;
-        ref.executeScript({ code: SAYFA_KODU }, (sonuc) => {
-          okuyor = false;
-          let o = {};
-          try { o = JSON.parse(sonuc && sonuc[0]); } catch (e) { o = {}; }
-          const engel = /just a moment|attention required/i.test(o.baslik || "");
-          sonDurum = 'başlık "' + (o.baslik || "?") + '", veri ' + (o.veriVar ? "var" : "yok") + ", ürün " + ((o.urunler && o.urunler.length) || 0) + (o.hata ? ", hata " + o.hata : "");
-          if (!engel && o.urunler && o.urunler.length) return bitir(() => resolve({ urunler: o.urunler.map((u) => ({ ...u, site: "Trendyol", fiyatMetin: fiyatYaz(u.fiyat) })) }));
-          if (!engel && o.veriVar && deneme >= 3) return bitir(() => resolve({ urunler: [] }));
-        });
+        okuyor = true; okumaBas = Date.now(); olay.tik++;
+        try {
+          ref.executeScript({ code: SAYFA_KODU }, (sonuc) => {
+            okuyor = false; olay.cevap++;
+            let o = {};
+            try { o = JSON.parse(sonuc && sonuc[0]); } catch (e) { o = {}; }
+            const engel = /just a moment|attention required/i.test(o.baslik || "");
+            sonDurum = 'başlık "' + (o.baslik || "?") + '", veri ' + (o.veriVar ? "var" : "yok") + ", ürün " + ((o.urunler && o.urunler.length) || 0) + (o.hata ? ", hata " + o.hata : "");
+            if (!engel && o.urunler && o.urunler.length) return bitir(() => resolve({ urunler: o.urunler.map((u) => ({ ...u, site: "Trendyol", fiyatMetin: fiyatYaz(u.fiyat) })) }));
+            if (!engel && o.veriVar && olay.cevap >= 3) return bitir(() => resolve({ urunler: [] }));
+          });
+        } catch (e) { okuyor = false; olay.hata = String(e).slice(0, 60); }
       };
-      ref.addEventListener("loadstop", () => { if (!zamanlayici) zamanlayici = setInterval(tik, 3500); });
-      ref.addEventListener("loaderror", (e) => bitir(() => reject(new Error((e && e.message) || "yüklenemedi"))));
-      ref.addEventListener("exit", () => bitir(() => reject(new Error("pencere erken kapandı (" + sonDurum + ")"))));
+      ref.addEventListener("loadstart", () => { olay.loadstart++; });
+      ref.addEventListener("loadstop", () => { olay.loadstop++; });
+      ref.addEventListener("loaderror", (e) => { olay.loaderror++; olay.hata = String((e && e.message) || "yüklenemedi").slice(0, 60); });
+      ref.addEventListener("exit", () => bitir(() => reject(new Error("pencere kapandı (" + ozet() + ")"))));
+      // Sayfa olaylarını beklemeden, açılışın hemen ardından düzenli aralıkla okumayı dener
+      zamanlayici = setInterval(tik, 3500);
     });
   }
 
